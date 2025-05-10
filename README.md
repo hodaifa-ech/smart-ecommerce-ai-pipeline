@@ -9,6 +9,11 @@ pip install -r requerement
 streamlit run main.py
 ```
 
+**requirements:**
+```
+export GROQ_API_KEY="api_key"                                    
+```
+
 # Scraping
 * selenium
 * firefox
