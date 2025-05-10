@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: smart-ecommerce-pipeline-
+spec:
+  entrypoint: main-pipeline
+  templates:
+  - name: main-pipeline
+    steps:
+    - - name: data-scraping
+        template: data-scraping
+    - - name: data-processing
+        template: data-processing
+        dependencies: [data-scraping]
+    - - name: ml-training
+        template: ml-training
+        dependencies: [data-processing]
+    - - name: model-evaluation
+        template: model-evaluation
+        dependencies: [ml-training]
+    - - name: deploy-model
+        template: deploy-model
+        dependencies: [model-evaluation]
+
+  - name: data-scraping
+    container:
+      image: smart-ecommerce-ai-pipeline:latest
+      command: [python]
+      args: ["-m", "utils.ali_express"]
+
+  - name: data-processing
+    container:
+      image: smart-ecommerce-ai-pipeline:latest
+      command: [python]
+      args: ["-m", "utils.data_processor"]
+
+  - name: ml-training
+    container:
+      image: smart-ecommerce-ai-pipeline:latest
+      command: [python]
+      args: ["-m", "utils.ml_trainer"]
+
+  - name: model-evaluation
+    container:
+      image: smart-ecommerce-ai-pipeline:latest
+      command: [python]
+      args: ["-m", "utils.model_evaluator"]
+
+  - name: deploy-model
+    container:
+      image: smart-ecommerce-ai-pipeline:latest
+      command: [python]
+      args: ["-m", "utils.model_deployer"] 

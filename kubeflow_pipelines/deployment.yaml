@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smart-ecommerce-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smart-ecommerce
+  template:
+    metadata:
+      labels:
+        app: smart-ecommerce
+    spec:
+      containers:
+      - name: smart-ecommerce
+        image: smart-ecommerce-ai-pipeline:latest
+        ports:
+        - containerPort: 8501
+        env:
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: groq-secret
+              key: api-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smart-ecommerce-service
+spec:
+  selector:
+    app: smart-ecommerce
+  ports:
+  - port: 80
+    targetPort: 8501
+  type: LoadBalancer 
