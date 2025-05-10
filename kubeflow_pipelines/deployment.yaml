@@ -15,6 +15,7 @@ spec:
       containers:
       - name: smart-ecommerce
         image: smart-ecommerce-ai-pipeline:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8501
         env:
@@ -32,6 +33,6 @@ spec:
   selector:
     app: smart-ecommerce
   ports:
-  - port: 80
+  - port: 8081
     targetPort: 8501
   type: LoadBalancer 

@@ -1,9 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+kind: Pipeline
 metadata:
   name: smart-ecommerce-pipeline
   namespace: kubeflow
 spec:
+  description: "Smart E-commerce AI Pipeline"
   entrypoint: main-pipeline
   templates:
   - name: main-pipeline
