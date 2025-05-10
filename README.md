@@ -5,7 +5,7 @@
 ```
 git clone https://github.com/hodaifa-ech/smart-ecommerce-ai-pipeline
 cd smart-ecommerce-ai-pipeline
-# pip install -r requerement 
+pip install -r requerement 
 streamlit run main.py
 ```
 
