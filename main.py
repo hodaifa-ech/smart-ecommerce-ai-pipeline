@@ -5,6 +5,7 @@ pages = {
         st.Page("tools/dashboard.py", title="Dashboard"),
         st.Page("tools/products.py", title="Products"),
         st.Page("tools/chat_app.py", title="Chat"),
+        st.Page("tools/machine_learning.py", title="Classifier (attractivness)"),
     ]
 }
 
