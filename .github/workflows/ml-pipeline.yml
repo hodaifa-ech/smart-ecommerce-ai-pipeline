@@ -44,9 +44,10 @@ jobs:
         version: 'latest'
     
     - name: Configure kubectl
-      uses: azure/k8s-set-context@v3
-      with:
-        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
     
     - name: Apply Kubeflow Pipeline
       run: |
