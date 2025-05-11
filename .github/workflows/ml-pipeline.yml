@@ -46,7 +46,9 @@ jobs:
     - name: Configure kubectl
       run: |
         mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" | tr -d '\n' | base64 -d > $HOME/.kube/config
+        echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.b64
+        base64 -d kubeconfig.b64 > $HOME/.kube/config
+        rm kubeconfig.b64
         chmod 600 $HOME/.kube/config
     
     - name: Apply Kubeflow Pipeline
