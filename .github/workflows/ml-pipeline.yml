@@ -20,7 +20,7 @@ jobs:
     - name: Login to DockerHub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        username: hodaifa485
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
     - name: Build and push
@@ -28,7 +28,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/smart-ecommerce-ml:latest
+        tags: hodaifa485/smart-ecommerce-ml:latest
 
   deploy-to-kubeflow:
     needs: build-and-push
@@ -37,6 +37,16 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+    
+    - name: Configure kubectl
+      uses: azure/k8s-set-context@v3
+      with:
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
     
     - name: Apply Kubeflow Pipeline
       run: |

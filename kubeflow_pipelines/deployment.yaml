@@ -12,10 +12,12 @@ spec:
       labels:
         app: smart-ecommerce
     spec:
+      imagePullSecrets:
+      - name: docker-registry-secret
       containers:
       - name: smart-ecommerce
-        image: smart-ecommerce-ai-pipeline:latest
-        imagePullPolicy: Never
+        image: docker.io/hodaifa485/smart-ecommerce-ml:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8501
         env:
@@ -35,4 +37,4 @@ spec:
   ports:
   - port: 8081
     targetPort: 8501
-  type: LoadBalancer 
+  type: LoadBalancer
