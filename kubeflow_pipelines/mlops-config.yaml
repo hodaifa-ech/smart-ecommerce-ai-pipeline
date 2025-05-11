@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlops-config
+  namespace: kubeflow
+data:
+  model-monitoring-interval: "3600"  # 1 hour
+  model-retraining-threshold: "0.8"  # 80% accuracy threshold
+  data-validation-rules: |
+    {
+      "min_samples": 1000,
+      "max_missing_ratio": 0.1,
+      "required_features": ["price", "rating", "sales"]
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-monitoring
+  namespace: kubeflow
+spec:
+  selector:
+    app: model-monitoring
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-monitoring
+  namespace: kubeflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: model-monitoring
+  template:
+    metadata:
+      labels:
+        app: model-monitoring
+    spec:
+      containers:
+      - name: monitoring
+        image: smart-ecommerce-ai-pipeline:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONITORING_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: mlops-config
+              key: model-monitoring-interval
+        - name: RETRAINING_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: mlops-config
+              key: model-retraining-threshold 
