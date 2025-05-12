@@ -42,6 +42,25 @@ export GROQ_API_KEY="api_key"
 ## Chat BOT
 ![image](https://github.com/user-attachments/assets/a93f477e-6fb5-4f60-8cac-2804c93a4ab3)
 
+# DevOps & Deployment
+
+This project is designed for robust, scalable deployment using modern DevOps practices:
+
+- **Dockerization:**
+  - The application is containerized using Docker. Use `build_and_push.sh` to build and push the image to Docker Hub.
+
+- **Kubernetes Deployment:**
+  - The app is deployed on Kubernetes using the manifests in the `k8s/` directory. The deployment exposes the Streamlit app via a LoadBalancer service.
+  - Secrets (such as the `GROQ_API_KEY`) are managed securely in Kubernetes using `setup-k8s-secret.sh`.
+
+- **Log Monitoring:**
+  - Use `view-logs.sh` to easily stream logs from the running Kubernetes pod for debugging and monitoring.
+
+- **CI/CD Automation:**
+  - GitHub Actions workflows (`.github/workflows/`) automate building, pushing, and deploying the Docker image to a local Minikube cluster on every push to `main`.
+  - The workflow handles namespace creation, secret management, cleanup of old deployments, and service exposure.
+
+These practices ensure the application is easy to deploy, update, and monitor in both development and production environments.
 
 # Authors 
 * Mohamed Amine BAHASSOU
