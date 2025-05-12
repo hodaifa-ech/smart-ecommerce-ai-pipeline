@@ -1,7 +1,0 @@
-streamlit
-plotly
-numpy
-pandas
-selenium
-beautifulsoup4
-groq

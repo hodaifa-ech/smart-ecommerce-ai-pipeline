@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smart-ecommerce-app
+  name: ecommerce-ai-pipeline
+  labels:
+    app: ecommerce-ai-pipeline
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: smart-ecommerce
+      app: ecommerce-ai-pipeline
   template:
     metadata:
       labels:
-        app: smart-ecommerce
+        app: ecommerce-ai-pipeline
     spec:
-      imagePullSecrets:
-      - name: docker-registry-secret
       containers:
-      - name: smart-ecommerce
-        image: docker.io/hodaifa485/smart-ecommerce-ml:latest
+      - name: ecommerce-ai-pipeline
+        image: hodaifa485/smart-ecommerce-ml:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
@@ -30,11 +30,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: smart-ecommerce-service
+  name: ecommerce-ai-pipeline-service
 spec:
   selector:
-    app: smart-ecommerce
+    app: ecommerce-ai-pipeline
   ports:
-  - port: 8081
-    targetPort: 8501
-  type: LoadBalancer
+    - protocol: TCP
+      port: 80
+      targetPort: 8501
+  type: LoadBalancer 
