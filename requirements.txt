@@ -6,3 +6,4 @@ selenium
 beautifulsoup4
 groq
 webdriver_manager
+requests
