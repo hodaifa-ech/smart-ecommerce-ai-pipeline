@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Deploy to Minikube
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
   IMAGE_NAME: ecommerce-app
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -33,4 +33,84 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest 
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+    - name: Cleanup old deployments
+      run: |
+        # Delete old deployments and services
+        kubectl delete deployment --all -n ecommerce --ignore-not-found=true
+        kubectl delete service --all -n ecommerce --ignore-not-found=true
+        kubectl delete pod --all -n ecommerce --ignore-not-found=true
+        
+        # Wait for cleanup
+        sleep 10
+
+    - name: Create GROQ Secret
+      run: |
+        kubectl create namespace ecommerce --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic groq-secret \
+          --namespace ecommerce \
+          --from-literal=api-key="${{ secrets.GROQ_API_KEY }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Deploy to Minikube
+      run: |
+        # Create deployment
+        cat <<EOF | kubectl apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ecommerce-app
+          namespace: ecommerce
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: ecommerce-app
+          template:
+            metadata:
+              labels:
+                app: ecommerce-app
+            spec:
+              containers:
+              - name: ecommerce-app
+                image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+                ports:
+                - containerPort: 8501
+                env:
+                - name: GROQ_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: groq-secret
+                      key: api-key
+        EOF
+
+        # Create service
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: ecommerce-service
+          namespace: ecommerce
+        spec:
+          selector:
+            app: ecommerce-app
+          ports:
+          - port: 80
+            targetPort: 8501
+          type: NodePort
+        EOF
+
+    - name: Verify Deployment
+      run: |
+        echo "Waiting for deployment to be ready..."
+        kubectl rollout status deployment/ecommerce-app -n ecommerce --timeout=300s
+        
+        echo "Deployment status:"
+        kubectl get pods -n ecommerce
+        
+        echo "Service status:"
+        kubectl get svc -n ecommerce
+        
+        echo "Minikube IP: $(minikube ip)"
+        echo "Service URL: http://$(minikube ip):$(kubectl get svc ecommerce-service -n ecommerce -o jsonpath='{.spec.ports[0].nodePort}')" 
