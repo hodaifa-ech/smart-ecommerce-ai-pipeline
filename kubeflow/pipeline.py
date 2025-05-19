@@ -88,22 +88,22 @@ def evaluate_model(
     with open(metrics_output, 'w') as f:
         json.dump(metrics, f)
 
-# Create components
+# Create components with updated syntax
 preprocess_op = create_component_from_func(
     func=preprocess_data,
-    base_image='python:3.9-slim',
+    base_image='python:3.10-slim',
     packages_to_install=['pandas', 'numpy', 'scikit-learn']
 )
 
 train_op = create_component_from_func(
     func=train_model,
-    base_image='python:3.9-slim',
+    base_image='python:3.10-slim',
     packages_to_install=['pandas', 'scikit-learn', 'joblib']
 )
 
 evaluate_op = create_component_from_func(
     func=evaluate_model,
-    base_image='python:3.9-slim',
+    base_image='python:3.10-slim',
     packages_to_install=['pandas', 'scikit-learn', 'joblib']
 )
 
