@@ -24,27 +24,29 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip setuptools wheel
 
-    - name: Deploy to Local Minikube
+    - name: Install dependencies
       run: |
-        # Clean up old deployments
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Clean up old deployments
+      run: |
         kubectl delete deployment --all -n ecommerce --ignore-not-found=true
         kubectl delete service --all -n ecommerce --ignore-not-found=true
         kubectl delete pod --all -n ecommerce --ignore-not-found=true
         kubectl delete pvc --all -n ecommerce --ignore-not-found=true
-        
-        # Wait for cleanup
         sleep 5
 
-        # Create namespace if it doesn't exist
+    - name: Create namespace and secrets
+      run: |
         kubectl create namespace ecommerce --dry-run=client -o yaml | kubectl apply -f -
-
-        # Create GROQ secret
         kubectl create secret generic groq-secret \
             --namespace ecommerce \
             --from-literal=api-key="${{ secrets.GROQ_API_KEY }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-        # Deploy the application
+    - name: Deploy Streamlit application
+      run: |
         cat <<EOF | kubectl apply -f -
         apiVersion: apps/v1
         kind: Deployment
@@ -72,9 +74,17 @@ jobs:
                     secretKeyRef:
                       name: groq-secret
                       key: api-key
+                resources:
+                  requests:
+                    memory: "512Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "1Gi"
+                    cpu: "500m"
         EOF
 
-        # Create service
+    - name: Create Streamlit service
+      run: |
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: Service
@@ -90,34 +100,72 @@ jobs:
           type: NodePort
         EOF
 
-        # Deploy Kubeflow pipeline
-        kubectl apply -f kubeflow/kubeflow-deployment.yaml
-
-      - name: Compile and Upload KFP Pipeline
+    - name: Deploy Kubeflow pipeline
       run: |
-        source venv/bin/activate
-        pip install -r requirements.txt # This will now work after fixing requirements.txt
-        
-        # Ensure upload_pipeline.py can import 'product_attractiveness_pipeline'
-        # Add this import to kubeflow/upload_pipeline.py:
-        # from pipeline import product_attractiveness_pipeline
-        # (Assuming pipeline.py and upload_pipeline.py are in the kubeflow directory)
-        
-        # Compile the pipeline (optional if upload_pipeline.py also compiles)
-        # python kubeflow/pipeline.py 
+        # Create necessary directories for Kubeflow
+        kubectl create configmap kubeflow-config \
+            --namespace ecommerce \
+            --from-file=kubeflow/pipeline.py \
+            --dry-run=client -o yaml | kubectl apply -f -
 
-        # Upload the pipeline
-        # The upload_pipeline.py script compiles and then uploads.
-        # If pipeline.py already compiled it, upload_pipeline.py can be modified
-        # to only upload the existing YAML.
-        # For simplicity, assuming upload_pipeline.py handles compilation:
-        python kubeflow/upload_pipeline.py
-      # To run the pipeline, you would then call run_pipeline.py, possibly passing the ID
-      # output by upload_pipeline.py. This step can be added if auto-execution is desired.
+        # Deploy Kubeflow pipeline
+        cat <<EOF | kubectl apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: kubeflow-pipeline
+          namespace: ecommerce
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: kubeflow-pipeline
+          template:
+            metadata:
+              labels:
+                app: kubeflow-pipeline
+            spec:
+              containers:
+              - name: kubeflow-pipeline
+                image: ${{ secrets.DOCKERHUB_USERNAME }}/ecommerce-app:latest
+                command: ["python"]
+                args: ["/app/kubeflow/pipeline.py"]
+                volumeMounts:
+                - name: kubeflow-config
+                  mountPath: /app/kubeflow
+                resources:
+                  requests:
+                    memory: "1Gi"
+                    cpu: "500m"
+                  limits:
+                    memory: "2Gi"
+                    cpu: "1000m"
+              volumes:
+              - name: kubeflow-config
+                configMap:
+                  name: kubeflow-config
+        EOF
+
+    - name: Create Kubeflow service
+      run: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: kubeflow-pipeline-service
+          namespace: ecommerce
+        spec:
+          selector:
+            app: kubeflow-pipeline
+          ports:
+          - port: 80
+            targetPort: 8080
+          type: NodePort
+        EOF
 
     - name: Verify Deployment
       run: |
-        echo "Waiting for deployment to be ready..."
+        echo "Waiting for deployments to be ready..."
         kubectl rollout status deployment/ecommerce-app -n ecommerce --timeout=300s
         kubectl rollout status deployment/kubeflow-pipeline -n ecommerce --timeout=300s
         
@@ -127,8 +175,8 @@ jobs:
         echo "Service status:"
         kubectl get svc -n ecommerce
         
-        echo "Service URL:"
+        echo "Streamlit Service URL:"
         minikube service ecommerce-service -n ecommerce --url
         
-        echo "Kubeflow Pipeline URL:"
+        echo "Kubeflow Pipeline Service URL:"
         minikube service kubeflow-pipeline-service -n ecommerce --url 
