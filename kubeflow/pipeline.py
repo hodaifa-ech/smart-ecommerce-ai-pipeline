@@ -1,6 +1,6 @@
 import kfp
 from kfp import dsl
-from kfp.components import create_component_from_func
+from kfp.v2 import components
 import os
 
 # Define the preprocessing component
@@ -89,19 +89,19 @@ def evaluate_model(
         json.dump(metrics, f)
 
 # Create components with updated syntax
-preprocess_op = create_component_from_func(
+preprocess_op = components.create_component_from_func(
     func=preprocess_data,
     base_image='python:3.10-slim',
     packages_to_install=['pandas', 'numpy', 'scikit-learn']
 )
 
-train_op = create_component_from_func(
+train_op = components.create_component_from_func(
     func=train_model,
     base_image='python:3.10-slim',
     packages_to_install=['pandas', 'scikit-learn', 'joblib']
 )
 
-evaluate_op = create_component_from_func(
+evaluate_op = components.create_component_from_func(
     func=evaluate_model,
     base_image='python:3.10-slim',
     packages_to_install=['pandas', 'scikit-learn', 'joblib']
@@ -112,30 +112,23 @@ evaluate_op = create_component_from_func(
     name='product-attractiveness-pipeline',
     description='Pipeline for product attractiveness classification'
 )
-def product_attractiveness_pipeline(
-    p_raw_data_path: str = '/app/data/aliexpress_multi_page_firefox.csv',
-    p_processed_data_path: str = '/app/data/processed_data.csv',
-    p_model_path: str = '/app/models/model.joblib',
-    p_metrics_path: str = '/app/metrics/metrics.json'
-):
+def product_attractiveness_pipeline():
+    # Define the pipeline steps
     preprocess_task = preprocess_op(
-        input_data=p_raw_data_path,
-        output_data=p_processed_data_path
+        input_data='/app/data/aliexpress_multi_page_firefox.csv',
+        output_data='/app/data/processed_data.csv'
     )
     
     train_task = train_op(
-        input_data=processed_data_path, # Use the defined path string
-        model_output=model_path
+        input_data=preprocess_task.output,
+        model_output='/app/models/model.joblib'
     )
-    # Ensure correct execution order if KFP can't infer it from data dependency
-    train_task.after(preprocess_task) 
     
     evaluate_task = evaluate_op(
-        input_data=processed_data_path, # Use the defined path string
-        model_path=model_path,          # Use the defined path string
-        metrics_output=metrics_path
+        input_data=preprocess_task.output,
+        model_path=train_task.output,
+        metrics_output='/app/metrics/metrics.json'
     )
-    evaluate_task.after(train_task)
 
 # Compile the pipeline
 if __name__ == '__main__':

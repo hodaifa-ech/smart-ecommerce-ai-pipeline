@@ -121,4 +121,13 @@ jobs:
         kubectl get svc -n ecommerce
         
         echo "Minikube IP: $(minikube ip)"
-        echo "Service URL: http://$(minikube ip):$(kubectl get svc ecommerce-service -n ecommerce -o jsonpath='{.spec.ports[0].nodePort}')" 
+        echo "Service URL: http://$(minikube ip):$(kubectl get svc ecommerce-service -n ecommerce -o jsonpath='{.spec.ports[0].nodePort}')"
+
+    - name: Find Kubeflow Dashboard Service
+      run: |
+        kubectl get svc -A | grep dashboard
+        kubectl get svc -n kubeflow
+
+    - name: Access Kubeflow Dashboard
+      run: |
+        minikube service central-dashboard -n kubeflow --url 
