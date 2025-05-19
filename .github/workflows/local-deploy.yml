@@ -17,7 +17,7 @@ jobs:
       run: |
         python3 -m venv venv
         source venv/bin/activate
-        pip install --upgrade pip
+        pip install --upgrade pip setuptools wheel
 
     - name: Deploy to Local Minikube
       run: |
@@ -90,7 +90,7 @@ jobs:
 
         # Install kfp in virtual environment and compile pipeline
         source venv/bin/activate
-        pip install "kfp==1.8.0"  # Install specific version
+        pip install -r requirements.txt
         python kubeflow/pipeline.py
         kubectl apply -f product-attractiveness-pipeline.yaml
 
