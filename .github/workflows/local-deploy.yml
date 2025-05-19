@@ -19,6 +19,7 @@ jobs:
         kubectl delete deployment --all -n ecommerce --ignore-not-found=true
         kubectl delete service --all -n ecommerce --ignore-not-found=true
         kubectl delete pod --all -n ecommerce --ignore-not-found=true
+        kubectl delete pvc --all -n ecommerce --ignore-not-found=true
         
         # Wait for cleanup
         sleep 5
@@ -78,10 +79,19 @@ jobs:
           type: NodePort
         EOF
 
+        # Deploy Kubeflow pipeline
+        kubectl apply -f kubeflow/kubeflow-deployment.yaml
+
+        # Compile and upload Kubeflow pipeline
+        pip install kfp
+        python kubeflow/pipeline.py
+        kubectl apply -f product-attractiveness-pipeline.yaml
+
     - name: Verify Deployment
       run: |
         echo "Waiting for deployment to be ready..."
         kubectl rollout status deployment/ecommerce-app -n ecommerce --timeout=300s
+        kubectl rollout status deployment/kubeflow-pipeline -n ecommerce --timeout=300s
         
         echo "Deployment status:"
         kubectl get pods -n ecommerce
@@ -90,4 +100,7 @@ jobs:
         kubectl get svc -n ecommerce
         
         echo "Service URL:"
-        minikube service ecommerce-service -n ecommerce --url 
+        minikube service ecommerce-service -n ecommerce --url
+        
+        echo "Kubeflow Pipeline URL:"
+        minikube service kubeflow-pipeline-service -n ecommerce --url 

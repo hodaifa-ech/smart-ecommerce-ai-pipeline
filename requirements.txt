@@ -7,3 +7,5 @@ beautifulsoup4
 groq
 webdriver_manager
 requests
+kubeflow-pipeline-sdk>=1.8.0
+kfp>=1.8.0
