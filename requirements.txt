@@ -7,7 +7,7 @@ beautifulsoup4
 groq
 webdriver_manager
 requests
-kfp
-kubeflow-pipeline-sdk
+kfp==2.2.6
+kubeflow-pipeline-sdk==2.2.6
 scikit-learn
 joblib
