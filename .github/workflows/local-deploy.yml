@@ -93,11 +93,27 @@ jobs:
         # Deploy Kubeflow pipeline
         kubectl apply -f kubeflow/kubeflow-deployment.yaml
 
-        # Install kfp in virtual environment and compile pipeline
+      - name: Compile and Upload KFP Pipeline
+      run: |
         source venv/bin/activate
-        pip install -r requirements.txt
-        python kubeflow/pipeline.py
-        kubectl apply -f product-attractiveness-pipeline.yaml
+        pip install -r requirements.txt # This will now work after fixing requirements.txt
+        
+        # Ensure upload_pipeline.py can import 'product_attractiveness_pipeline'
+        # Add this import to kubeflow/upload_pipeline.py:
+        # from pipeline import product_attractiveness_pipeline
+        # (Assuming pipeline.py and upload_pipeline.py are in the kubeflow directory)
+        
+        # Compile the pipeline (optional if upload_pipeline.py also compiles)
+        # python kubeflow/pipeline.py 
+
+        # Upload the pipeline
+        # The upload_pipeline.py script compiles and then uploads.
+        # If pipeline.py already compiled it, upload_pipeline.py can be modified
+        # to only upload the existing YAML.
+        # For simplicity, assuming upload_pipeline.py handles compilation:
+        python kubeflow/upload_pipeline.py
+      # To run the pipeline, you would then call run_pipeline.py, possibly passing the ID
+      # output by upload_pipeline.py. This step can be added if auto-execution is desired.
 
     - name: Verify Deployment
       run: |

@@ -8,6 +8,5 @@ groq
 webdriver_manager
 requests
 kfp==2.0.1
-kubeflow-pipeline-sdk==2.0.1
 scikit-learn
 joblib

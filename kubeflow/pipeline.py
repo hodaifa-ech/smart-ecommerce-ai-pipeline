@@ -112,23 +112,30 @@ evaluate_op = create_component_from_func(
     name='product-attractiveness-pipeline',
     description='Pipeline for product attractiveness classification'
 )
-def product_attractiveness_pipeline():
-    # Define the pipeline steps
+def product_attractiveness_pipeline(
+    p_raw_data_path: str = '/app/data/aliexpress_multi_page_firefox.csv',
+    p_processed_data_path: str = '/app/data/processed_data.csv',
+    p_model_path: str = '/app/models/model.joblib',
+    p_metrics_path: str = '/app/metrics/metrics.json'
+):
     preprocess_task = preprocess_op(
-        input_data='/app/data/aliexpress_multi_page_firefox.csv',
-        output_data='/app/data/processed_data.csv'
+        input_data=p_raw_data_path,
+        output_data=p_processed_data_path
     )
     
     train_task = train_op(
-        input_data=preprocess_task.output,
-        model_output='/app/models/model.joblib'
+        input_data=processed_data_path, # Use the defined path string
+        model_output=model_path
     )
+    # Ensure correct execution order if KFP can't infer it from data dependency
+    train_task.after(preprocess_task) 
     
     evaluate_task = evaluate_op(
-        input_data=preprocess_task.output,
-        model_path=train_task.output,
-        metrics_output='/app/metrics/metrics.json'
+        input_data=processed_data_path, # Use the defined path string
+        model_path=model_path,          # Use the defined path string
+        metrics_output=metrics_path
     )
+    evaluate_task.after(train_task)
 
 # Compile the pipeline
 if __name__ == '__main__':
