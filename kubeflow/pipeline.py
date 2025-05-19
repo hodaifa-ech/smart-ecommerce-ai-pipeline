@@ -1,10 +1,9 @@
 import kfp
 from kfp import dsl
-from kfp.components import func_to_container_op
+from kfp.components import create_component_from_func
 import os
 
 # Define the preprocessing component
-@func_to_container_op
 def preprocess_data(
     input_data: str,
     output_data: str
@@ -29,7 +28,6 @@ def preprocess_data(
     df.to_csv(output_data, index=False)
 
 # Define the training component
-@func_to_container_op
 def train_model(
     input_data: str,
     model_output: str
@@ -57,7 +55,6 @@ def train_model(
     joblib.dump(model, model_output)
 
 # Define the evaluation component
-@func_to_container_op
 def evaluate_model(
     input_data: str,
     model_path: str,
@@ -91,6 +88,25 @@ def evaluate_model(
     with open(metrics_output, 'w') as f:
         json.dump(metrics, f)
 
+# Create components
+preprocess_op = create_component_from_func(
+    func=preprocess_data,
+    base_image='python:3.9-slim',
+    packages_to_install=['pandas', 'numpy', 'scikit-learn']
+)
+
+train_op = create_component_from_func(
+    func=train_model,
+    base_image='python:3.9-slim',
+    packages_to_install=['pandas', 'scikit-learn', 'joblib']
+)
+
+evaluate_op = create_component_from_func(
+    func=evaluate_model,
+    base_image='python:3.9-slim',
+    packages_to_install=['pandas', 'scikit-learn', 'joblib']
+)
+
 # Define the pipeline
 @dsl.pipeline(
     name='product-attractiveness-pipeline',
@@ -98,17 +114,17 @@ def evaluate_model(
 )
 def product_attractiveness_pipeline():
     # Define the pipeline steps
-    preprocess_task = preprocess_data(
+    preprocess_task = preprocess_op(
         input_data='/app/data/aliexpress_multi_page_firefox.csv',
         output_data='/app/data/processed_data.csv'
     )
     
-    train_task = train_model(
+    train_task = train_op(
         input_data=preprocess_task.output,
         model_output='/app/models/model.joblib'
     )
     
-    evaluate_task = evaluate_model(
+    evaluate_task = evaluate_op(
         input_data=preprocess_task.output,
         model_path=train_task.output,
         metrics_output='/app/metrics/metrics.json'

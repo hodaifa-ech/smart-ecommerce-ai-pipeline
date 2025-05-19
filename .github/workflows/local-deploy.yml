@@ -90,7 +90,7 @@ jobs:
 
         # Install kfp in virtual environment and compile pipeline
         source venv/bin/activate
-        pip install kfp
+        pip install "kfp==1.8.0"  # Install specific version
         python kubeflow/pipeline.py
         kubectl apply -f product-attractiveness-pipeline.yaml
 
