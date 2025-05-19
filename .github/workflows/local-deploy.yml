@@ -13,9 +13,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
     - name: Set up Python virtual environment
       run: |
-        python3 -m venv venv
+        python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip setuptools wheel
 
