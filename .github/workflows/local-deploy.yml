@@ -13,6 +13,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set up Python virtual environment
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+
     - name: Deploy to Local Minikube
       run: |
         # Clean up old deployments
@@ -82,7 +88,8 @@ jobs:
         # Deploy Kubeflow pipeline
         kubectl apply -f kubeflow/kubeflow-deployment.yaml
 
-        # Compile and upload Kubeflow pipeline
+        # Install kfp in virtual environment and compile pipeline
+        source venv/bin/activate
         pip install kfp
         python kubeflow/pipeline.py
         kubectl apply -f product-attractiveness-pipeline.yaml
