@@ -8,7 +8,7 @@ import sys        # <-- Import sys to get python executable
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Shopify Product Analysis Dashboard",
+    page_title="Tableau de Bord d'Analyse des Produits Shopify", # MODIFIED
     page_icon="📊",
     layout="wide" # Use wide layout for more space
 )
@@ -27,7 +27,7 @@ def load_data(filename):
     """Loads data from the CSV file."""
     absolute_csv_path = os.path.abspath(filename) # Get absolute path for clarity
     if not os.path.exists(absolute_csv_path):
-        st.error(f"Error: Data file not found at expected location: {absolute_csv_path}. Please run the scraper first.")
+        st.error(f"Erreur : Fichier de données non trouvé à l'emplacement attendu : {absolute_csv_path}. Veuillez d'abord exécuter le scraper.") # MODIFIED
         return None
     try:
         df = pd.read_csv(absolute_csv_path) # Load using absolute path
@@ -49,14 +49,14 @@ def load_data(filename):
         # Handle potential missing values in key categorical columns
         for col in ['vendor', 'product_type', 'store_domain']:
             if col in df.columns:
-                df[col].fillna('Unknown', inplace=True)
+                df[col].fillna('Inconnu', inplace=True) # MODIFIED (Unknown -> Inconnu)
 
         return df
     except pd.errors.EmptyDataError:
-        st.error(f"Error: {absolute_csv_path} is empty. Please ensure the fetch script ran successfully and generated data.")
+        st.error(f"Erreur : {absolute_csv_path} est vide. Veuillez vous assurer que le script de récupération s'est exécuté avec succès et a généré des données.") # MODIFIED
         return None
     except Exception as e:
-        st.error(f"An error occurred while loading or processing the CSV ({absolute_csv_path}): {e}")
+        st.error(f"Une erreur s'est produite lors du chargement ou du traitement du CSV ({absolute_csv_path}) : {e}") # MODIFIED
         return None
 
 # --- Function to run the scraper script ---
@@ -65,9 +65,9 @@ def run_scraper(script_path):
     absolute_script_path = os.path.abspath(script_path)
     script_dir = os.path.dirname(absolute_script_path) # Get directory of the script
 
-    st.info(f"Attempting to run scraper: {absolute_script_path}")
+    st.info(f"Tentative d'exécution du scraper : {absolute_script_path}") # MODIFIED
     if not os.path.exists(absolute_script_path):
-         st.error(f"Scraper script not found at: {absolute_script_path}")
+         st.error(f"Script du scraper non trouvé à : {absolute_script_path}") # MODIFIED
          return False
 
     try:
@@ -81,32 +81,32 @@ def run_scraper(script_path):
             check=False,          # Don't raise exception on non-zero exit, check manually
             cwd=script_dir        # Set working directory
         )
-        st.info("Scraper script execution finished.")
+        st.info("Exécution du script du scraper terminée.") # MODIFIED
 
         # Display output/errors from the script in expanders for debugging
-        with st.expander("Show Scraper Output (stdout)"):
-            st.text(process.stdout if process.stdout else "No standard output.")
+        with st.expander("Afficher la Sortie du Scraper (stdout)"): # MODIFIED
+            st.text(process.stdout if process.stdout else "Pas de sortie standard.") # MODIFIED
         if process.stderr:
-             with st.expander("Show Scraper Errors (stderr)", expanded=True): # Expand if errors exist
+             with st.expander("Afficher les Erreurs du Scraper (stderr)", expanded=True): # MODIFIED
                 st.text(process.stderr)
 
         if process.returncode == 0:
-            st.success("Data scraping completed successfully!")
+            st.success("Récupération des données terminée avec succès !") # MODIFIED
             return True
         else:
-            st.error(f"Data scraping script failed with exit code {process.returncode}. Check errors above.")
+            st.error(f"Le script de récupération des données a échoué avec le code de sortie {process.returncode}. Vérifiez les erreurs ci-dessus.") # MODIFIED
             return False
     except Exception as e:
-        st.error(f"An error occurred while trying to run the scraper process: {e}")
+        st.error(f"Une erreur s'est produite lors de la tentative d'exécution du processus du scraper : {e}") # MODIFIED
         return False
 
 # --- Main Application ---
-st.title("📊 Shopify Product Data Dashboard")
-st.markdown("Analyze product data fetched from various Shopify stores via their `/products.json` endpoints.")
+st.title("📊 Tableau de Bord des Données Produits Shopify") # MODIFIED
+st.markdown("Analysez les données produits récupérées de diverses boutiques Shopify via leurs points de terminaison `/products.json`.") # MODIFIED
 
 
 # --- Sidebar ---
-st.sidebar.header("Actions")
+st.sidebar.header("Actions") # Actions is fine
 
 # --- Button to trigger scraping ---
 # Construct the path to the scraper script relative to *this* dashboard script
@@ -115,21 +115,21 @@ st.sidebar.header("Actions")
 dashboard_dir = os.path.dirname(__file__)
 scraper_script_path = os.path.join(dashboard_dir, "..", "utils", "fetch_shopify_product_data.py")
 
-if st.sidebar.button("🔄 Scrape New Shopify Data"):
+if st.sidebar.button("🔄 Récupérer de Nouvelles Données Shopify"): # MODIFIED
     # Use a spinner to indicate activity
-    with st.spinner(f"Running Shopify data scraper... Please wait. This might take a while."):
+    with st.spinner(f"Exécution du scraper de données Shopify... Veuillez patienter. Cela peut prendre un certain temps."): # MODIFIED
         success = run_scraper(scraper_script_path)
         if success:
             # IMPORTANT: Clear the cache so load_data runs again
             st.cache_data.clear()
-            st.success("Cache cleared. Rerunning the app to load fresh data...")
+            st.success("Cache vidé. Redémarrage de l'application pour charger les nouvelles données...") # MODIFIED
             # Rerun the app immediately to reflect the newly scraped data
             st.experimental_rerun()
         else:
-            st.warning("Scraping process failed or encountered errors. Data might not be up-to-date.")
+            st.warning("Le processus de récupération a échoué ou a rencontré des erreurs. Les données pourraient ne pas être à jour.") # MODIFIED
 
 st.sidebar.markdown("---") # Separator before filters
-st.sidebar.header("Filters")
+st.sidebar.header("Filtres") # MODIFIED
 
 # --- Load Data ---
 # Load data *after* the button logic, so rerun works correctly
@@ -144,10 +144,10 @@ data = load_data(absolute_csv_path)
 if data is not None and not data.empty:
 
     # Filter data based on domain selection (using the already loaded 'data' DataFrame)
-    all_domains = ['All'] + sorted(data['store_domain'].unique().tolist())
-    selected_domain = st.sidebar.selectbox("Select Store Domain", all_domains)
+    all_domains = ['Tous'] + sorted(data['store_domain'].unique().tolist()) # MODIFIED
+    selected_domain = st.sidebar.selectbox("Sélectionner le Domaine de la Boutique", all_domains) # MODIFIED
 
-    if selected_domain != 'All':
+    if selected_domain != 'Tous': # MODIFIED
         filtered_data = data[data['store_domain'] == selected_domain].copy()
     else:
         filtered_data = data.copy()
@@ -155,15 +155,15 @@ if data is not None and not data.empty:
     # --- Dynamic Filters based on current selection ---
     if not filtered_data.empty:
         # Filter by Vendor
-        all_vendors = ['All'] + sorted(filtered_data['vendor'].unique().tolist())
-        selected_vendor = st.sidebar.selectbox("Select Vendor", all_vendors)
-        if selected_vendor != 'All':
+        all_vendors = ['Tous'] + sorted(filtered_data['vendor'].unique().tolist()) # MODIFIED
+        selected_vendor = st.sidebar.selectbox("Sélectionner le Fournisseur", all_vendors) # MODIFIED
+        if selected_vendor != 'Tous': # MODIFIED
             filtered_data = filtered_data[filtered_data['vendor'] == selected_vendor].copy()
 
         # Filter by Product Type
-        all_product_types = ['All'] + sorted(filtered_data['product_type'].unique().tolist())
-        selected_product_type = st.sidebar.selectbox("Select Product Type", all_product_types)
-        if selected_product_type != 'All':
+        all_product_types = ['Tous'] + sorted(filtered_data['product_type'].unique().tolist()) # MODIFIED
+        selected_product_type = st.sidebar.selectbox("Sélectionner le Type de Produit", all_product_types) # MODIFIED
+        if selected_product_type != 'Tous': # MODIFIED
             filtered_data = filtered_data[filtered_data['product_type'] == selected_product_type].copy()
 
         # Filter by Price Range
@@ -181,11 +181,11 @@ if data is not None and not data.empty:
              min_price_val = 0.0
              max_price_val = 1.0
              default_price_range = (0.0, 1.0)
-             st.sidebar.warning("Price data missing or invalid for range slider.")
+             st.sidebar.warning("Données de prix manquantes ou invalides pour le sélecteur de plage.") # MODIFIED
 
 
         price_range = st.sidebar.slider(
-            "Select Price Range ($)",
+            "Sélectionner la Fourchette de Prix ($)", # MODIFIED
             min_value=min_price_val,
             max_value=max_price_val,
             value=default_price_range, # Use calculated default range
@@ -201,9 +201,9 @@ if data is not None and not data.empty:
 
          # Filter by Availability
         if 'available' in filtered_data.columns:
-            availability_options = {'All': None, 'Available': True, 'Unavailable': False}
+            availability_options = {'Tous': None, 'Disponible': True, 'Indisponible': False} # MODIFIED
             selected_availability_str = st.sidebar.radio(
-                "Filter by Availability",
+                "Filtrer par Disponibilité", # MODIFIED
                 options=list(availability_options.keys()),
                 index=0 # Default to 'All'
             )
@@ -211,16 +211,16 @@ if data is not None and not data.empty:
             if selected_availability_bool is not None:
                 filtered_data = filtered_data[filtered_data['available'] == selected_availability_bool].copy()
         else:
-            st.sidebar.warning("Availability data column not found.")
+            st.sidebar.warning("Colonne de données de disponibilité introuvable.") # MODIFIED
 
     else:
-        st.sidebar.warning("No data matches the current domain filter.")
+        st.sidebar.warning("Aucune donnée ne correspond au filtre de domaine actuel.") # MODIFIED
 
 
     # --- Main Dashboard Area (Only if filtered_data is not empty) ---
     if not filtered_data.empty:
-        st.header("📈 Key Performance Indicators (KPIs)")
-        st.markdown("Overview metrics for the selected data.")
+        st.header("📈 Indicateurs Clés de Performance (KPIs)") # MODIFIED
+        st.markdown("Métriques d'aperçu pour les données sélectionnées.") # MODIFIED
 
         # --- Calculate KPIs (Safely handle potential missing columns/data) ---
         total_unique_products = filtered_data['product_id'].nunique() if 'product_id' in filtered_data else 0
@@ -242,169 +242,169 @@ if data is not None and not data.empty:
         # Display KPIs in columns
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Total Unique Products", f"{total_unique_products:,}")
-            st.metric("Total Variants", f"{total_variants:,}")
+            st.metric("Total Produits Uniques", f"{total_unique_products:,}") # MODIFIED
+            st.metric("Total Variantes", f"{total_variants:,}") # MODIFIED
         with col2:
-            st.metric("Available Variants", f"{available_variants:,}")
-            st.metric("Unavailable Variants", f"{unavailable_variants:,}")
+            st.metric("Variantes Disponibles", f"{available_variants:,}") # MODIFIED
+            st.metric("Variantes Indisponibles", f"{unavailable_variants:,}") # MODIFIED
         with col3:
-            st.metric("Average Variant Price", f"${average_price:,.2f}" if pd.notna(average_price) else "N/A")
-            st.metric("Median Variant Price", f"${median_price:,.2f}" if pd.notna(median_price) else "N/A")
+            st.metric("Prix Moyen des Variantes", f"${average_price:,.2f}" if pd.notna(average_price) else "N/D") # MODIFIED
+            st.metric("Prix Médian des Variantes", f"${median_price:,.2f}" if pd.notna(median_price) else "N/D") # MODIFIED
         with col4:
-            st.metric("Number of Vendors", f"{num_vendors:,}")
-            st.metric("Number of Product Types", f"{num_product_types:,}")
+            st.metric("Nombre de Fournisseurs", f"{num_vendors:,}") # MODIFIED
+            st.metric("Nombre de Types de Produits", f"{num_product_types:,}") # MODIFIED
 
         st.markdown("---") # Divider
 
         # --- Data Visualizations ---
-        st.header("📊 Data Visualizations")
-        st.markdown("Interactive charts exploring the product data.")
+        st.header("📊 Visualisations des Données") # MODIFIED
+        st.markdown("Graphiques interactifs explorant les données produits.") # MODIFIED
 
         viz_col1, viz_col2 = st.columns(2)
 
         with viz_col1:
             # Price Distribution Histogram
-            st.subheader("Variant Price Distribution")
+            st.subheader("Distribution des Prix des Variantes") # MODIFIED
             if 'price' in filtered_data.columns and not filtered_data['price'].isnull().all():
                 fig_price_hist = px.histogram(
                     filtered_data.dropna(subset=['price']),
                     x="price",
                     nbins=50,
-                    title="Distribution of Variant Prices",
-                    labels={'price': 'Price ($)'},
+                    title="Distribution des Prix des Variantes", # MODIFIED
+                    labels={'price': 'Prix ($)'}, # MODIFIED
                     color_discrete_sequence=px.colors.sequential.Viridis
                 )
                 fig_price_hist.update_layout(bargap=0.1)
                 st.plotly_chart(fig_price_hist, use_container_width=True)
             else:
-                st.warning("No valid price data available for the current selection to display distribution.")
+                st.warning("Aucune donnée de prix valide disponible pour la sélection actuelle pour afficher la distribution.") # MODIFIED
 
             # Product Count per Vendor Bar Chart
-            st.subheader("Product Count per Vendor")
+            st.subheader("Nombre de Produits par Fournisseur") # MODIFIED
             if 'vendor' in filtered_data.columns and 'product_id' in filtered_data.columns:
                 vendor_product_counts = filtered_data.groupby('vendor')['product_id'].nunique().sort_values(ascending=False).reset_index()
-                vendor_product_counts.columns = ['Vendor', 'Unique Product Count'] # Rename columns for clarity
+                vendor_product_counts.columns = ['Fournisseur', 'Nombre de Produits Uniques'] # MODIFIED
                 if not vendor_product_counts.empty:
                     top_n = 20
                     display_counts = vendor_product_counts.head(top_n)
                     if len(vendor_product_counts) > top_n:
-                         st.caption(f"Showing Top {top_n} Vendors by Product Count")
+                         st.caption(f"Affichage des {top_n} Principaux Fournisseurs par Nombre de Produits") # MODIFIED
 
                     fig_vendor_bar = px.bar(
-                        display_counts, # Use the limited df for the plot
-                        x="Vendor",
-                        y="Unique Product Count",
-                        title="Unique Products per Vendor",
-                        labels={'Unique Product Count': 'Number of Unique Products'},
-                        color='Vendor',
+                        display_counts, 
+                        x="Fournisseur", # MODIFIED
+                        y="Nombre de Produits Uniques", # MODIFIED
+                        title="Produits Uniques par Fournisseur", # MODIFIED
+                        labels={'Fournisseur': 'Fournisseur', 'Nombre de Produits Uniques': 'Nombre de Produits Uniques'}, # MODIFIED (keys are new column names)
+                        color='Fournisseur', # MODIFIED
                         color_discrete_sequence=px.colors.qualitative.Pastel
                     )
                     fig_vendor_bar.update_layout(xaxis_tickangle=-45, showlegend=False)
                     st.plotly_chart(fig_vendor_bar, use_container_width=True)
                 else:
-                    st.warning("No vendor data available for the current selection.")
+                    st.warning("Aucune donnée de fournisseur disponible pour la sélection actuelle.") # MODIFIED
             else:
-                 st.warning("Vendor or Product ID data missing for this chart.")
+                 st.warning("Données de Fournisseur ou d'ID Produit manquantes pour ce graphique.") # MODIFIED
 
 
         with viz_col2:
              # Variant Availability Pie Chart
-            st.subheader("Variant Availability")
+            st.subheader("Disponibilité des Variantes") # MODIFIED
             if 'available' in filtered_data.columns:
                 availability_counts = filtered_data['available'].value_counts().reset_index()
-                availability_counts.columns = ['Available', 'Count']
+                availability_counts.columns = ['Disponible', 'Nombre'] # MODIFIED
                 # Map boolean/None to readable strings safely
-                availability_counts['Available'] = availability_counts['Available'].apply(
-                    lambda x: 'Available' if x is True else ('Unavailable' if x is False else 'Unknown')
+                availability_counts['Disponible'] = availability_counts['Disponible'].apply(
+                    lambda x: 'Disponible' if x is True else ('Indisponible' if x is False else 'Inconnu') # MODIFIED
                 )
 
 
                 if not availability_counts.empty:
                     fig_avail_pie = px.pie(
                         availability_counts,
-                        names='Available',
-                        values='Count',
-                        title='Availability Status of Variants',
+                        names='Disponible', # MODIFIED
+                        values='Nombre', # MODIFIED
+                        title='Statut de Disponibilité des Variantes', # MODIFIED
                         hole=0.3, # Make it a donut chart
-                        color_discrete_map={'Available':'#2ca02c', 'Unavailable':'#d62728', 'Unknown':'#7f7f7f'}
+                        color_discrete_map={'Disponible':'#2ca02c', 'Indisponible':'#d62728', 'Inconnu':'#7f7f7f'} # MODIFIED
                     )
                     fig_avail_pie.update_traces(textposition='inside', textinfo='percent+label')
                     st.plotly_chart(fig_avail_pie, use_container_width=True)
                 else:
-                    st.warning("No availability data available for the current selection.")
+                    st.warning("Aucune donnée de disponibilité disponible pour la sélection actuelle.") # MODIFIED
             else:
-                st.warning("Availability data column not found for pie chart.")
+                st.warning("Colonne de données de disponibilité introuvable pour le diagramme circulaire.") # MODIFIED
 
             # Product Count per Type Bar Chart
-            st.subheader("Product Count per Product Type")
+            st.subheader("Nombre de Produits par Type de Produit") # MODIFIED
             if 'product_type' in filtered_data.columns and 'product_id' in filtered_data.columns:
                 type_product_counts = filtered_data.groupby('product_type')['product_id'].nunique().sort_values(ascending=False).reset_index()
-                type_product_counts.columns = ['Product Type', 'Unique Product Count'] # Rename columns
+                type_product_counts.columns = ['Type de Produit', 'Nombre de Produits Uniques'] # MODIFIED
                 if not type_product_counts.empty:
                     top_n_type = 20
                     display_type_counts = type_product_counts.head(top_n_type)
                     if len(type_product_counts) > top_n_type:
-                         st.caption(f"Showing Top {top_n_type} Product Types by Product Count")
+                         st.caption(f"Affichage des {top_n_type} Principaux Types de Produits par Nombre de Produits") # MODIFIED
 
                     fig_type_bar = px.bar(
-                        display_type_counts, # Use the limited df
-                        x="Product Type",
-                        y="Unique Product Count",
-                        title="Unique Products per Type",
-                        labels={'Unique Product Count': 'Number of Unique Products'},
-                        color='Product Type',
+                        display_type_counts, 
+                        x="Type de Produit", # MODIFIED
+                        y="Nombre de Produits Uniques", # MODIFIED
+                        title="Produits Uniques par Type", # MODIFIED
+                        labels={'Type de Produit': 'Type de Produit', 'Nombre de Produits Uniques': 'Nombre de Produits Uniques'}, # MODIFIED
+                        color='Type de Produit', # MODIFIED
                         color_discrete_sequence=px.colors.qualitative.Set2
                     )
                     fig_type_bar.update_layout(xaxis_tickangle=-45, showlegend=False)
                     st.plotly_chart(fig_type_bar, use_container_width=True)
                 else:
-                    st.warning("No product type data available for the current selection.")
+                    st.warning("Aucune donnée de type de produit disponible pour la sélection actuelle.") # MODIFIED
             else:
-                 st.warning("Product Type or Product ID data missing for this chart.")
+                 st.warning("Données de Type de Produit ou d'ID Produit manquantes pour ce graphique.") # MODIFIED
 
         st.markdown("---")
 
         # --- Data Storytelling & Insights ---
-        st.header("🔍 Data Storytelling & Insights")
+        st.header("🔍 Narration des Données & Perspectives") # MODIFIED
 
         # Storytelling Example 1: Availability Issues
         if 'available' in filtered_data.columns and unavailable_variants > 0:
             percent_unavailable = (unavailable_variants / total_variants) * 100 if total_variants > 0 else 0
-            st.subheader("Stock Availability Concerns")
+            st.subheader("Préoccupations Concernant la Disponibilité des Stocks") # MODIFIED
             st.markdown(f"""
-            Based on the current selection, **{unavailable_variants:,}** product variants ({percent_unavailable:.1f}%) are marked as **unavailable**.
-            This could indicate potential stock issues or items that are intentionally not for sale.
-            """)
+            Selon la sélection actuelle, **{unavailable_variants:,}** variantes de produits ({percent_unavailable:.1f}%) sont marquées comme **indisponibles**.
+            Cela pourrait indiquer des problèmes de stock potentiels ou des articles qui ne sont intentionnellement pas à vendre.
+            """) # MODIFIED
             # List some unavailable products/variants
             unavailable_sample_cols = ['title', 'variant_title', 'vendor', 'store_domain']
             # Check if required columns exist before trying to display
             if all(col in filtered_data.columns for col in unavailable_sample_cols):
                  unavailable_sample = filtered_data[filtered_data['available'] == False][unavailable_sample_cols].drop_duplicates().head(10)
                  if not unavailable_sample.empty:
-                     with st.expander("View Sample of Unavailable Variants"):
+                     with st.expander("Voir un Échantillon des Variantes Indisponibles"): # MODIFIED
                          st.dataframe(unavailable_sample, use_container_width=True)
             else:
-                 st.caption("Cannot display unavailable sample - one or more required columns (title, variant_title, vendor, store_domain) are missing.")
+                 st.caption("Impossible d'afficher l'échantillon indisponible - une ou plusieurs colonnes requises (title, variant_title, vendor, store_domain) sont manquantes.") # MODIFIED
 
 
         # Storytelling Example 2: Price Analysis
-        st.subheader("Price Point Analysis")
+        st.subheader("Analyse des Niveaux de Prix") # MODIFIED
         if 'price' in filtered_data.columns and pd.notna(average_price):
             st.markdown(f"""
-            The average price for a variant in the selected dataset is **${average_price:,.2f}**, with the median price at **${median_price:,.2f}**.
-            The distribution chart above shows how prices are spread across the selection. Any significant peaks might indicate common price points.
-            """)
+            Le prix moyen d'une variante dans l'ensemble de données sélectionné est de **${average_price:,.2f}**, avec un prix médian de **${median_price:,.2f}**.
+            Le graphique de distribution ci-dessus montre comment les prix sont répartis dans la sélection. Des pics significatifs pourraient indiquer des niveaux de prix courants.
+            """) # MODIFIED
             # Highlight most expensive items
             expensive_cols = ['title', 'vendor', 'price', 'store_domain']
             if all(col in filtered_data.columns for col in expensive_cols):
                 most_expensive = filtered_data.sort_values('price', ascending=False).drop_duplicates(subset=['product_id']).head(5)
                 if not most_expensive.empty:
-                     with st.expander("Top 5 Most Expensive Products (based on highest variant price)"):
+                     with st.expander("Top 5 des Produits les Plus Chers (basé sur le prix de variante le plus élevé)"): # MODIFIED
                         st.dataframe(most_expensive[expensive_cols], use_container_width=True)
             else:
-                 st.caption("Cannot display most expensive products - required columns are missing.")
+                 st.caption("Impossible d'afficher les produits les plus chers - des colonnes requises sont manquantes.") # MODIFIED
         else:
-             st.markdown("Price analysis is limited due to missing or invalid price data in the current selection.")
+             st.markdown("L'analyse des prix est limitée en raison de données de prix manquantes ou invalides dans la sélection actuelle.") # MODIFIED
 
         # Storytelling Example 3: Vendor Dominance (if applicable)
         if 'vendor' in filtered_data.columns and 'product_id' in filtered_data.columns and num_vendors > 1:
@@ -416,19 +416,19 @@ if data is not None and not data.empty:
                 top_vendor_share = (top_vendor_count / total_prods_for_vendors) * 100 if total_prods_for_vendors > 0 else 0
 
                 if top_vendor_share > 40: # Only highlight if one vendor is somewhat dominant
-                    st.subheader("Vendor Focus")
+                    st.subheader("Focus sur le Fournisseur") # MODIFIED
                     st.markdown(f"""
-                    The vendor **'{top_vendor}'** accounts for **{top_vendor_count:,}** unique products, representing approximately **{top_vendor_share:.1f}%** of the products
-                    from known vendors in the current selection. This suggests a significant presence or a large catalog from this vendor compared to others in the filtered data.
-                    """)
+                    Le fournisseur **'{top_vendor}'** représente **{top_vendor_count:,}** produits uniques, soit environ **{top_vendor_share:.1f}%** des produits des fournisseurs connus dans la sélection actuelle. 
+                    Cela suggère une présence significative ou un catalogue important de ce fournisseur par rapport aux autres dans les données filtrées.
+                    """) # MODIFIED
 
 
         st.markdown("---")
 
         # --- Raw Data Exploration ---
-        st.header(" Raw Data")
-        st.markdown("Explore the filtered data used for the analysis above.")
-        with st.expander("Show Filtered Data Table"):
+        st.header("Données Brutes") # MODIFIED
+        st.markdown("Explorez les données filtrées utilisées pour l'analyse ci-dessus.") # MODIFIED
+        with st.expander("Afficher le Tableau des Données Filtrées"): # MODIFIED
             # Show a limited number of columns by default for better readability
             default_columns_to_show = ['store_domain', 'vendor', 'title', 'product_type', 'variant_title', 'price', 'available', 'updated_at']
             # Filter to only columns that actually exist in the dataframe
@@ -436,20 +436,20 @@ if data is not None and not data.empty:
             if columns_to_show:
                 display_df = filtered_data[columns_to_show].copy()
                 st.dataframe(display_df, use_container_width=True)
-                st.caption(f"Displaying {len(filtered_data)} rows matching the current filters. Selected columns shown.")
+                st.caption(f"Affichage de {len(filtered_data)} lignes correspondant aux filtres actuels. Colonnes sélectionnées affichées.") # MODIFIED
             else:
-                st.warning("No columns available to display in the raw data table.")
+                st.warning("Aucune colonne disponible à afficher dans le tableau des données brutes.") # MODIFIED
 
 
     elif data is not None: # Original data was loaded, but filtered result is empty
-        st.warning("No data matches the selected filters. Try adjusting the filter criteria in the sidebar.")
+        st.warning("Aucune donnée ne correspond aux filtres sélectionnés. Essayez d'ajuster les critères de filtre dans la barre latérale.") # MODIFIED
     # else: Handled by the initial load_data check
 
 
 else:
     # This message is shown if load_data returned None or empty DataFrame initially
-    st.warning("Could not load or process product data. Please ensure the data file exists and contains valid data, or use the 'Scrape New Shopify Data' button.")
+    st.warning("Impossible de charger ou de traiter les données produits. Veuillez vous assurer que le fichier de données existe et contient des données valides, ou utilisez le bouton 'Récupérer de Nouvelles Données Shopify'.") # MODIFIED
 
 # Add footer or additional info if needed
 st.sidebar.markdown("---")
-st.sidebar.info("Dashboard developed to analyze Shopify product data.")
+st.sidebar.info("Tableau de bord développé pour analyser les données produits Shopify.") # MODIFIED

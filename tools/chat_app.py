@@ -2,17 +2,24 @@ import streamlit as st
 import utils.chat as chat
 import utils.ali_express as ali_express
 
-st.set_page_config(page_title="Chatbot App", page_icon="💬")
-st.title("💬 Chatbot Assistant")
+st.set_page_config(page_title="Application Chatbot", page_icon="💬") # MODIFIED
+st.title("💬 Assistant Chatbot") # MODIFIED
+
+def initialize_or_reset_chat(custom_greeting=None):
+    """Initializes or resets the chat messages in session_state."""
+    default_greeting = "Bonjour! Comment puis-je vous aider à analyser vos données produits aujourd'hui?"
+    greeting = custom_greeting if custom_greeting else default_greeting
+    st.session_state.messages = [{"role": "assistant", "content": greeting}]
 
 
+initialize_or_reset_chat()
 
 with st.sidebar:
-    st.sidebar.markdown("## New Data ?")
-    if st.button("Scrap new data"):
-        with st.spinner("Scraping top selling items from AliExpress..."):
+    st.sidebar.markdown("## Nouvelles Données ?") # MODIFIED
+    if st.button("Lancer un nouveau scraping"): # MODIFIED
+        with st.spinner("Scraping des articles les plus vendus sur AliExpress..."): # MODIFIED
             ali_express.scrape_aliexpress_top_selling()
-        st.success("Scraping completed!")
+        st.success("Scraping terminé !") # MODIFIED
     st.sidebar.markdown("---")
 
 
@@ -29,7 +36,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # User input
-user_input = st.chat_input("Type your message...")
+user_input = st.chat_input("Tapez votre message...") # MODIFIED
 
 if user_input:
     # Show user's message
@@ -38,7 +45,7 @@ if user_input:
 
     # Get model response
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
+        with st.spinner("Réflexion en cours..."): # MODIFIED
             response = chat.completion(st.session_state.messages)
             st.markdown(response)
 
