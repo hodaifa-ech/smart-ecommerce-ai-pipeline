@@ -136,6 +136,73 @@ The pipeline is triggered on:
 After deployment, the application is accessible at:
 - Streamlit Dashboard: `http://<minikube-ip>:<nodeport>`
 
+## Accessing the Application in Minikube
+
+### 1. Start Minikube
+```bash
+# Start Minikube
+minikube start
+
+# Verify Minikube is running
+minikube status
+```
+
+### 2. Deploy the Application
+```bash
+# Deploy using the GitHub Actions workflow
+# Or manually deploy using:
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
+### 3. Access the Application
+```bash
+# Get the Minikube IP
+minikube ip
+
+# Get the NodePort
+kubectl get svc ecommerce-service -n ecommerce -o jsonpath='{.spec.ports[0].nodePort}'
+
+# Access the application at:
+# http://<minikube-ip>:<nodeport>
+```
+
+### 4. Common Minikube Commands
+```bash
+# View all pods
+kubectl get pods -n ecommerce
+
+# View logs
+./view-logs.sh
+
+# Restart Minikube if needed
+minikube stop
+minikube start
+
+# Delete the deployment
+kubectl delete deployment ecommerce-app -n ecommerce
+kubectl delete service ecommerce-service -n ecommerce
+```
+
+### 5. Troubleshooting
+If you can't access the application:
+1. Check if Minikube is running:
+   ```bash
+   minikube status
+   ```
+2. Verify the pod is running:
+   ```bash
+   kubectl get pods -n ecommerce
+   ```
+3. Check the service:
+   ```bash
+   kubectl get svc -n ecommerce
+   ```
+4. View pod logs:
+   ```bash
+   ./view-logs.sh
+   ```
+
 ## Monitoring and Maintenance
 
 ### Logs
@@ -147,7 +214,9 @@ After deployment, the application is accessible at:
   - Error tracking
 
 ### Resource Monitoring
-- Monitor pod status: `kubectl get pods -n ecommerce`
+- Monitor pod status: `kubectl get pods -n minikube stop
+minikube start
+`
 - Check service status: `kubectl get svc -n ecommerce`
 - View resource usage: `kubectl top pods -n ecommerce`
 
@@ -165,6 +234,30 @@ After deployment, the application is accessible at:
    kubectl get endpoints -n ecommerce
    ```
 
+
+
+## DevOps Screenshots
+
+### 1. GitHub Actions
+![GitHub Actions Workflow](screenshots/devops/github-actions-workflow.png)
+*Successful workflow run in GitHub Actions*
+
+![Deployment Steps](screenshots/devops/deployment-steps.png)
+*Deployment steps showing successful pod and service creation*
+
+### 2. Kubernetes Deployment
+![Pod Status](screenshots/devops/pod-status.png)
+*Kubernetes pods running in the ecommerce namespace*
+
+![Service Status](screenshots/devops/service-status.png)
+*NodePort service configuration*
+
+![Application Access](screenshots/devops/application-access.png)
+*Streamlit application running in browser*
+
+
+
+   ```
 # Authors 
 * Mohamed Amine BAHASSOU
 * Hodaifa ECHFFANI
