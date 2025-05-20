@@ -132,6 +132,7 @@ The pipeline is triggered on:
 
 ## Accessing the Application
 
+
 After deployment, the application is accessible at:
 - Streamlit Dashboard: `http://<minikube-ip>:<nodeport>`
 
