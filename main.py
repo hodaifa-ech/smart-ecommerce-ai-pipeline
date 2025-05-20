@@ -9,6 +9,7 @@ pages = {
     ],
     "🟢 Shopify": [
         st.Page("tools/shopify.py", title="Dashboard"),
+        st.Page("tools/chat_shopify_app.py", title="Chat Bot"),
     ]
 
 }
