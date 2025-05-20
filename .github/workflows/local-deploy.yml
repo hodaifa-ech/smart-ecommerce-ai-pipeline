@@ -100,74 +100,10 @@ jobs:
           type: NodePort
         EOF
 
-    - name: Deploy Kubeflow pipeline
-      run: |
-        # Create necessary directories for Kubeflow
-        kubectl create configmap kubeflow-config \
-            --namespace ecommerce \
-            --from-file=kubeflow/pipeline.py \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-        # Deploy Kubeflow pipeline
-        cat <<EOF | kubectl apply -f -
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: kubeflow-pipeline
-          namespace: ecommerce
-        spec:
-          replicas: 1
-          selector:
-            matchLabels:
-              app: kubeflow-pipeline
-          template:
-            metadata:
-              labels:
-                app: kubeflow-pipeline
-            spec:
-              containers:
-              - name: kubeflow-pipeline
-                image: ${{ secrets.DOCKERHUB_USERNAME }}/ecommerce-app:latest
-                command: ["python"]
-                args: ["/app/kubeflow/pipeline.py"]
-                volumeMounts:
-                - name: kubeflow-config
-                  mountPath: /app/kubeflow
-                resources:
-                  requests:
-                    memory: "1Gi"
-                    cpu: "500m"
-                  limits:
-                    memory: "2Gi"
-                    cpu: "1000m"
-              volumes:
-              - name: kubeflow-config
-                configMap:
-                  name: kubeflow-config
-        EOF
-
-    - name: Create Kubeflow service
-      run: |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: kubeflow-pipeline-service
-          namespace: ecommerce
-        spec:
-          selector:
-            app: kubeflow-pipeline
-          ports:
-          - port: 80
-            targetPort: 8080
-          type: NodePort
-        EOF
-
     - name: Verify Deployment
       run: |
-        echo "Waiting for deployments to be ready..."
+        echo "Waiting for deployment to be ready..."
         kubectl rollout status deployment/ecommerce-app -n ecommerce --timeout=300s
-        kubectl rollout status deployment/kubeflow-pipeline -n ecommerce --timeout=300s
         
         echo "Deployment status:"
         kubectl get pods -n ecommerce
@@ -175,8 +111,19 @@ jobs:
         echo "Service status:"
         kubectl get svc -n ecommerce
         
-        echo "Streamlit Service URL:"
-        minikube service ecommerce-service -n ecommerce --url
+        # Get the Minikube IP
+        MINIKUBE_IP=$(minikube ip)
         
-        echo "Kubeflow Pipeline Service URL:"
-        minikube service kubeflow-pipeline-service -n ecommerce --url 
+        # Get the NodePort for Streamlit service
+        STREAMLIT_PORT=$(kubectl get svc ecommerce-service -n ecommerce -o jsonpath='{.spec.ports[0].nodePort}')
+        
+        echo "================================================"
+        echo "🚀 Deployment to Minikube Completed Successfully!"
+        echo "================================================"
+        echo ""
+        echo "📊 Streamlit Dashboard is available at:"
+        echo "   http://$MINIKUBE_IP:$STREAMLIT_PORT"
+        echo ""
+        echo "================================================"
+        echo "To view logs, use: ./view-logs.sh"
+        echo "================================================" 

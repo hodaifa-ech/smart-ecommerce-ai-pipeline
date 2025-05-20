@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build the Docker image
+# Build the Docker images
 docker build -t hodaifa485/smart-ecommerce-ml:latest .
 
 # Login to Docker Hub (you'll be prompted for credentials)

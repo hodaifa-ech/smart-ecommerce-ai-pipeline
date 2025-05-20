@@ -42,25 +42,127 @@ export GROQ_API_KEY="api_key"
 ## Chat BOT
 ![image](https://github.com/user-attachments/assets/a93f477e-6fb5-4f60-8cac-2804c93a4ab3)
 
-# DevOps & Deployment
+# DevOps Architecture
 
-This project is designed for robust, scalable deployment using modern DevOps practices:
+## Docker Setup
+The application is containerized using Docker with the following configuration:
+```dockerfile
+FROM python:3.9-slim
+```
+- Base image: Python 3.9-slim
+- Includes Firefox for Selenium web scraping
+- Exposes port 8501 for Streamlit
+- Environment variables for API keys
+- Optimized layer caching for faster builds
 
-- **Dockerization:**
-  - The application is containerized using Docker. Use `build_and_push.sh` to build and push the image to Docker Hub.
+## Kubernetes Deployment
+The application is deployed on Kubernetes with the following components:
 
-- **Kubernetes Deployment:**
-  - The app is deployed on Kubernetes using the manifests in the `k8s/` directory. The deployment exposes the Streamlit app via a LoadBalancer service.
-  - Secrets (such as the `GROQ_API_KEY`) are managed securely in Kubernetes using `setup-k8s-secret.sh`.
+### Namespace
+- `ecommerce`: Isolated environment for the application
 
-- **Log Monitoring:**
-  - Use `view-logs.sh` to easily stream logs from the running Kubernetes pod for debugging and monitoring.
+### Deployment
+- Name: `ecommerce-app`
+- Replicas: 1
+- Resources:
+  - Requests: 512Mi memory, 250m CPU
+  - Limits: 1Gi memory, 500m CPU
 
-- **CI/CD Automation:**
-  - GitHub Actions workflows (`.github/workflows/`) automate building, pushing, and deploying the Docker image to a local Minikube cluster on every push to `main`.
-  - The workflow handles namespace creation, secret management, cleanup of old deployments, and service exposure.
+### Service
+- Name: `ecommerce-service`
+- Type: NodePort
+- Port: 80
+- Target Port: 8501
 
-These practices ensure the application is easy to deploy, update, and monitor in both development and production environments.
+### Secrets
+- `groq-secret`: Stores API keys securely
+- Managed through `setup-k8s-secret.sh`
+
+## CI/CD Pipeline (GitHub Actions)
+The pipeline is triggered on:
+- Push to main branch
+- Manual workflow dispatch
+
+### Pipeline Steps
+1. **Environment Setup**
+   - Checkout code
+   - Setup Python 3.10
+   - Create virtual environment
+   - Install dependencies
+
+2. **Deployment**
+   - Clean up old deployments
+   - Create namespace and secrets
+   - Deploy Streamlit application
+   - Create service
+   - Verify deployment
+
+3. **Post-Deployment**
+   - Display access URL
+   - Show deployment status
+   - Provide logging instructions
+
+## Utility Scripts
+
+### 1. build_and_push.sh
+```bash
+# Build and push Docker image
+./build_and_push.sh
+```
+- Builds Docker image
+- Logs into Docker Hub
+- Pushes image to registry
+
+### 2. view-logs.sh
+```bash
+# View application logs
+./view-logs.sh
+```
+- Automatically finds the correct pod
+- Streams logs in real-time
+- Easy to monitor application status
+
+### 3. setup-k8s-secret.sh
+```bash
+# Setup Kubernetes secrets
+./setup-k8s-secret.sh
+```
+- Creates necessary Kubernetes secrets
+- Manages API keys securely
+
+## Accessing the Application
+
+After deployment, the application is accessible at:
+- Streamlit Dashboard: `http://<minikube-ip>:<nodeport>`
+
+## Monitoring and Maintenance
+
+### Logs
+- Use `view-logs.sh` to monitor application logs
+- Logs include:
+  - Application startup
+  - Scraping operations
+  - API calls
+  - Error tracking
+
+### Resource Monitoring
+- Monitor pod status: `kubectl get pods -n ecommerce`
+- Check service status: `kubectl get svc -n ecommerce`
+- View resource usage: `kubectl top pods -n ecommerce`
+
+### Troubleshooting
+1. Check pod status:
+   ```bash
+   kubectl describe pod <pod-name> -n ecommerce
+   ```
+2. View pod logs:
+   ```bash
+   kubectl logs <pod-name> -n ecommerce
+   ```
+3. Check service endpoints:
+   ```bash
+   kubectl get endpoints -n ecommerce
+   ```
 
 # Authors 
 * Mohamed Amine BAHASSOU
