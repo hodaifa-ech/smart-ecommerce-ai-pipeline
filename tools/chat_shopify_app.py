@@ -35,22 +35,6 @@ if chat.df.empty:
 
 # --- Sidebar ---
 with st.sidebar:
-    st.sidebar.markdown("## Nouvelles Données AliExpress?")
-    if st.button("Lancer un nouveau scraping AliExpress"):
-        if chat.df.empty: # Or some other logic if scraping populates chat.df
-            st.warning("Attention: Le fichier CSV principal n'est pas chargé. Le scraping peut continuer mais les données ne seront pas immédiatement combinées.")
-        with st.spinner("Scraping des articles les plus vendus sur AliExpress..."):
-            try:
-                # Assuming scrape_aliexpress_top_selling updates or creates products_data.csv
-                # And we might need to reload chat.df after this
-                ali_express.scrape_aliexpress_top_selling()
-                st.success("Scraping terminé ! Veuillez recharger la page ou redémarrer l'application pour utiliser les nouvelles données.")
-                # For a more dynamic update, you'd need to reload chat.df here
-                # and potentially clear chat history or notify user to restart chat.
-                # e.g. chat.df = pd.read_csv(chat.FILENAME) # simplified reload
-            except Exception as e:
-                st.error(f"Erreur durant le scraping : {e}")
-    st.sidebar.markdown("---")
     st.sidebar.markdown("Modèle LLM: `llama3-70b-8192` (via Groq)")
     st.sidebar.markdown(f"Produits chargés: {len(chat.df)} (depuis `{chat.FILENAME}`)")
 
