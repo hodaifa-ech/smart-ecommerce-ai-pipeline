@@ -1,263 +1,176 @@
-![image](https://github.com/user-attachments/assets/f8cf2774-d0ad-4314-9000-2c8eca4bf1c5)
 
+# Smart E-commerce AI Pipeline
 
-# Getting Started 
-```
+![Project Banner](https://github.com/user-attachments/assets/f8cf2774-d0ad-4314-9000-2c8eca4bf1c5)
+
+Advanced e-commerce analytics platform combining web scraping, LLM-powered recommendations, and real-time dashboards.
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Python 3.9+
+- Firefox browser
+- [Groq API key](https://console.groq.com/)
+
+### Installation
+```bash
+# Clone repository
 git clone https://github.com/hodaifa-ech/smart-ecommerce-ai-pipeline
 cd smart-ecommerce-ai-pipeline
-pip install -r requirement.txt 
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set API key (Linux/macOS)
+export GROQ_API_KEY="your_api_key_here"
+
+# For Windows:
+# set GROQ_API_KEY="your_api_key_here"
+
+# Launch application
 streamlit run main.py
 ```
 
-**requirements:**
-```
-export GROQ_API_KEY="api_key"                                    
-```
+## ✨ Key Features
+| Feature | Description |
+|---------|-------------|
+| 📊 **Interactive Dashboard** | Real-time sales analytics with filters |
+| 🚀 **Top Selling Products** | Identify best-performing items |
+| 💬 **AI Recommendation Bot** | LLM-powered shopping assistant |
+| ⚙️ **Automated Scraping** | Product data extraction pipeline |
 
-# Scraping
-* selenium
-* firefox
-* csv
+## 🛠️ Tech Stack
+- **Data Extraction**: Selenium, Firefox
+- **AI Engine**: Llama 3 70B (via Groq)
+- **Frontend**: Streamlit
+- **Data Processing**: CSV, Pandas
+- **Infrastructure**: Docker, Kubernetes
 
-# LLM Model 
-* LLAMA 3 70B - groq provider
+## 📸 Application Screenshots
 
-# FrontEnd | Data visualization
-* streamlit
+### Dashboard Analytics
+![Dashboard](https://github.com/user-attachments/assets/2e8510b3-e980-423f-98c9-e2608027a8d1)
+*Interactive filters and data visualizations*
 
-# Features 
-* dashboard
-* top selling products
-* chat BOT (for recommendation)
+### Product Analysis
+![Products](https://github.com/user-attachments/assets/df450a8a-a123-401a-8e6b-700e31360ff0)
+*Product performance metrics*
 
-# Screen Shots
-## Dashboard (Data Visualization, Filters )
-![image](https://github.com/user-attachments/assets/2e8510b3-e980-423f-98c9-e2608027a8d1)
+### Best Sellers
+![Best Sellers](https://github.com/user-attachments/assets/5db40e82-575e-4eb3-a0be-2f443f02502d)
+*Top performing products*
 
-![image](https://github.com/user-attachments/assets/df450a8a-a123-401a-8e6b-700e31360ff0)
+### AI Shopping Assistant
+![Chat Bot](https://github.com/user-attachments/assets/a93f477e-6fb5-4f60-8cac-2804c93a4ab3)
+*LLM-powered product recommendations*
 
-## Products (Filters, best selling)
-![image](https://github.com/user-attachments/assets/5db40e82-575e-4eb3-a0be-2f443f02502d)
+## 🐳 DevOps Architecture
 
-## Chat BOT
-![image](https://github.com/user-attachments/assets/a93f477e-6fb5-4f60-8cac-2804c93a4ab3)
-
-# DevOps Architecture
-
-## Docker Setup
-The application is containerized using Docker with the following configuration:
+### Docker Setup
 ```dockerfile
 FROM python:3.9-slim
+# ... (rest of Dockerfile) ...
 ```
-- Base image: Python 3.9-slim
-- Includes Firefox for Selenium web scraping
-- Exposes port 8501 for Streamlit
-- Environment variables for API keys
-- Optimized layer caching for faster builds
 
-## Kubernetes Deployment
-The application is deployed on Kubernetes with the following components:
+### Kubernetes Deployment
+```yaml
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-app
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce
+  template:
+    metadata:
+      labels:
+        app: ecommerce
+    spec:
+      containers:
+      - name: main-app
+        image: your-registry/ecommerce-app:latest
+        ports:
+        - containerPort: 8501
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+```
 
-### Namespace
-- `ecommerce`: Isolated environment for the application
+### CI/CD Pipeline (GitHub Actions)
+```yaml
+name: Deploy to Kubernetes
 
-### Deployment
-- Name: `ecommerce-app`
-- Replicas: 1
-- Resources:
-  - Requests: 512Mi memory, 250m CPU
-  - Limits: 1Gi memory, 500m CPU
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-### Service
-- Name: `ecommerce-service`
-- Type: NodePort
-- Port: 80
-- Target Port: 8501
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to cluster
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+```
 
-### Secrets
-- `groq-secret`: Stores API keys securely
-- Managed through `setup-k8s-secret.sh`
-
-## CI/CD Pipeline (GitHub Actions)
-The pipeline is triggered on:
-- Push to main branch
-- Manual workflow dispatch
-
-### Pipeline Steps
-1. **Environment Setup**
-   - Checkout code
-   - Setup Python 3.10
-   - Create virtual environment
-   - Install dependencies
-
-2. **Deployment**
-   - Clean up old deployments
-   - Create namespace and secrets
-   - Deploy Streamlit application
-   - Create service
-   - Verify deployment
-
-3. **Post-Deployment**
-   - Display access URL
-   - Show deployment status
-   - Provide logging instructions
-
-## Utility Scripts
-
-### 1. build_and_push.sh
+### Deployment Scripts
 ```bash
 # Build and push Docker image
 ./build_and_push.sh
-```
-- Builds Docker image
-- Logs into Docker Hub
-- Pushes image to registry
 
-### 2. view-logs.sh
-```bash
-# View application logs
-./view-logs.sh
-```
-- Automatically finds the correct pod
-- Streams logs in real-time
-- Easy to monitor application status
-
-### 3. setup-k8s-secret.sh
-```bash
 # Setup Kubernetes secrets
 ./setup-k8s-secret.sh
-```
-- Creates necessary Kubernetes secrets
-- Manages API keys securely
 
-## Accessing the Application
-
-
-After deployment, the application is accessible at:
-- Streamlit Dashboard: `http://<minikube-ip>:<nodeport>`
-
-## Accessing the Application in Minikube
-
-### 1. Start Minikube
-```bash
-# Start Minikube
-minikube start
-
-# Verify Minikube is running
-minikube status
-```
-
-### 2. Deploy the Application
-```bash
-# Deploy using the GitHub Actions workflow
-# Or manually deploy using:
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-```
-
-### 3. Access the Application
-```bash
-# Get the Minikube IP
-minikube ip
-
-# Get the NodePort
-kubectl get svc ecommerce-service -n ecommerce -o jsonpath='{.spec.ports[0].nodePort}'
-
-# Access the application at:
-# http://<minikube-ip>:<nodeport>
-```
-
-### 4. Common Minikube Commands
-```bash
-# View all pods
-kubectl get pods -n ecommerce
-
-# View logs
+# Monitor application logs
 ./view-logs.sh
-
-# Restart Minikube if needed
-minikube stop
-minikube start
-
-# Delete the deployment
-kubectl delete deployment ecommerce-app -n ecommerce
-kubectl delete service ecommerce-service -n ecommerce
 ```
 
-### 5. Troubleshooting
-If you can't access the application:
-1. Check if Minikube is running:
-   ```bash
-   minikube status
-   ```
-2. Verify the pod is running:
-   ```bash
-   kubectl get pods -n ecommerce
-   ```
-3. Check the service:
-   ```bash
-   kubectl get svc -n ecommerce
-   ```
-4. View pod logs:
-   ```bash
-   ./view-logs.sh
-   ```
-
-## Monitoring and Maintenance
-
-### Logs
-- Use `view-logs.sh` to monitor application logs
-- Logs include:
-  - Application startup
-  - Scraping operations
-  - API calls
-  - Error tracking
-
-### Resource Monitoring
-- Monitor pod status: `kubectl get pods -n minikube stop
+## ☁️ Cloud Deployment
+```bash
+# Start Minikube environment
 minikube start
-`
-- Check service status: `kubectl get svc -n ecommerce`
-- View resource usage: `kubectl top pods -n ecommerce`
 
-### Troubleshooting
-1. Check pod status:
+# Deploy application
+kubectl apply -f k8s/
+
+# Access application
+minikube service ecommerce-service -n ecommerce
+```
+
+## 🛠️ Troubleshooting
+**Common Issues:**
+1. **Missing API Key:**
    ```bash
-   kubectl describe pod <pod-name> -n ecommerce
+   export GROQ_API_KEY="valid_key"  # Add to ~/.bashrc for persistence
    ```
-2. View pod logs:
+2. **Selenium Errors:**
+   - Ensure Firefox is installed
+   - Update geckodriver
+3. **Kubernetes Deployment:**
    ```bash
-   kubectl logs <pod-name> -n ecommerce
-   ```
-3. Check service endpoints:
-   ```bash
-   kubectl get endpoints -n ecommerce
+   kubectl get pods -n ecommerce  # Check pod status
+   kubectl describe pod [POD_NAME]  # Inspect errors
    ```
 
+## 👥 Authors
+- Mohamed Amine BAHASSOU 
+- Hodaifa ECHFFANI
 
+---
 
-## DevOps Screenshots
+**Note:** For production deployments, consider implementing:
+- Horizontal Pod Autoscaling
+- Persistent volume for data storage
+- HTTPS ingress configuration
+- Monitoring with Prometheus/Grafana
 
-### 1. GitHub Actions
-![GitHub Actions Workflow](screenshots/devops/github-actions-workflow.png)
-*Successful workflow run in GitHub Actions*
-
-![Deployment Steps](screenshots/devops/deployment-steps.png)
-*Deployment steps showing successful pod and service creation*
-
-### 2. Kubernetes Deployment
-![Pod Status](screenshots/devops/pod-status.png)
-*Kubernetes pods running in the ecommerce namespace*
-
-![Service Status](screenshots/devops/service-status.png)
-*NodePort service configuration*
-
-![Application Access](screenshots/devops/application-access.png)
-*Streamlit application running in browser*
-
-
-
-   ```
-# Authors 
-* Mohamed Amine BAHASSOU
-* Hodaifa ECHFFANI
