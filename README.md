@@ -1,7 +1,9 @@
 
-# Smart E-commerce AI Pipeline
+<div>
+  <img src="https://github.com/user-attachments/assets/bb4920ab-6ee6-4b5a-b928-401df4c94993" width="200px"/>
+</div>
 
-![Project Banner](https://github.com/user-attachments/assets/f8cf2774-d0ad-4314-9000-2c8eca4bf1c5)
+# Smart E-commerce AI Pipeline
 
 Advanced e-commerce analytics platform combining web scraping, LLM-powered recommendations, and real-time dashboards.
 
@@ -46,23 +48,48 @@ streamlit run main.py
 - **Data Processing**: CSV, Pandas
 - **Infrastructure**: Docker, Kubernetes
 
+## Data Scrapping 
+|Shop|Method|Technologies|
+|---|---|---|
+| <img src="https://github.com/user-attachments/assets/0e03c7f7-1ac4-4fd4-b593-9809bde4223f" width="100px" /> |![image](https://github.com/user-attachments/assets/f3759752-98b3-4a05-9598-8bde9dfaa474) <br/> <img src="https://github.com/user-attachments/assets/90e4a3e3-6ca1-4c59-b3d9-995ed48d5c91" width="60%" /> | <img src="https://github.com/user-attachments/assets/a8e831ac-1f69-4a78-8c1a-da317ed617b1" width="100px" /> <br/> <img src="https://github.com/user-attachments/assets/046f73e3-9978-4117-afe3-e78c9b5fed49" width="100px" />   |
+| <img src="https://github.com/user-attachments/assets/23a748ba-49f2-4201-a97f-eeccc2e7dfe1" width="100px"/> | ![image](https://github.com/user-attachments/assets/22d7e7ed-62f9-4538-a2a8-2d1f34752b61) |API `/products.json`|
+
+
+
 ## 📸 Application Screenshots
 
 ### Dashboard Analytics
-![Dashboard](https://github.com/user-attachments/assets/2e8510b3-e980-423f-98c9-e2608027a8d1)
+|Ali-Express|Shopify|
+|---|---|
+| ![image](https://github.com/user-attachments/assets/943dddb4-7776-4193-bcc0-da2432c77b5c) | ![image](https://github.com/user-attachments/assets/0ed78370-1cae-418a-aa94-2b14aa74e69a) |
+|![image](https://github.com/user-attachments/assets/3412ef85-354c-46f5-9db0-102878fdac14)|![image](https://github.com/user-attachments/assets/943376ff-006e-4c3a-b307-73639be3a98d) |
+
 *Interactive filters and data visualizations*
 
 ### Product Analysis
-![Products](https://github.com/user-attachments/assets/df450a8a-a123-401a-8e6b-700e31360ff0)
+
+ | ![image](https://github.com/user-attachments/assets/14ac6f46-b36b-4ce4-aef7-4c09f2f4f332) | ![image](https://github.com/user-attachments/assets/5f026509-c9a7-4510-85af-8487222d8dd9) |
+|--------|---------|
+
 *Product performance metrics*
 
-### Best Sellers
-![Best Sellers](https://github.com/user-attachments/assets/5db40e82-575e-4eb3-a0be-2f443f02502d)
+### Top k Products
+
+| ![image](https://github.com/user-attachments/assets/78af8183-61f8-4964-9302-ff5ad4b83d7e) |
+|----|
+
 *Top performing products*
 
 ### AI Shopping Assistant
-![Chat Bot](https://github.com/user-attachments/assets/a93f477e-6fb5-4f60-8cac-2804c93a4ab3)
+
+| ![image](https://github.com/user-attachments/assets/aff8833f-6f04-4b7c-a4b8-625b0e9652c2) 
+|---|
+
 *LLM-powered product recommendations*
+
+### Classifier attractiveness 
+| ![image](https://github.com/user-attachments/assets/998a2911-923c-4002-974d-e8c6cffd4cbc) | ![image](https://github.com/user-attachments/assets/c1df96a0-4216-4a9b-a867-8ce8e551838c) |![image](https://github.com/user-attachments/assets/7442acdf-dd7d-4ead-a174-1d6679541b28) |
+|----|---|---|
 
 ## 🐳 DevOps Architecture
 
@@ -162,15 +189,15 @@ minikube service ecommerce-service -n ecommerce
    kubectl describe pod [POD_NAME]  # Inspect errors
    ```
 
-## 👥 Authors
-- Mohamed Amine BAHASSOU 
-- Hodaifa ECHFFANI
 
----
 
 **Note:** For production deployments, consider implementing:
 - Horizontal Pod Autoscaling
 - Persistent volume for data storage
 - HTTPS ingress configuration
 - Monitoring with Prometheus/Grafana
+
+## 👥 Authors
+- Mohamed Amine BAHASSOU 
+- Hodaifa ECHFFANI
 
