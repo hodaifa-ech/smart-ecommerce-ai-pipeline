@@ -85,6 +85,13 @@ streamlit run main.py
 | ![image](https://github.com/user-attachments/assets/aff8833f-6f04-4b7c-a4b8-625b0e9652c2) 
 |---|
 
+
+<img src="https://github.com/user-attachments/assets/a92eb3b7-6223-42cc-b6fc-580a8dbccb47" height="100px"/>
+<img src="https://github.com/user-attachments/assets/9f66876b-bf5f-4650-ae2d-f315eddd184b" height="100px"/>
+<img src="https://github.com/user-attachments/assets/a75050ad-9958-4dab-979f-024c315bb942" height="100px"/>
+
+
+
 *LLM-powered product recommendations*
 
 ### Classifier attractiveness 
