@@ -189,9 +189,9 @@ The pipeline defines a Directed Acyclic Graph (DAG) to manage dependencies betwe
 
 ```mermaid
 graph TD
-    A[Scrape AliExpress Data] --> B[Train Attractiveness Classifier];
-    B --> C{Model Artifact (.pkl)};
-    B --> D{Performance Metrics};
+    A[Scrape AliExpress Data] --> B[Train Attractiveness Classifier]
+    B --> C{Model Artifact (.pkl)}
+    B --> D{Performance Metrics}
 ```
 
 ### Pipeline Components
