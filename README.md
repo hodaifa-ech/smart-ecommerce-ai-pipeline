@@ -181,6 +181,79 @@ kubectl apply -f k8s/
 minikube service ecommerce-service -n ecommerce
 ```
 
+## 🔄 Kubeflow Pipeline Orchestration
+
+To automate the entire data and model lifecycle, this project implements a Kubeflow Pipeline. This pipeline orchestrates the scraping, data processing, and model training steps in a reproducible and scalable workflow running on top of Kubernetes.
+
+The pipeline defines a Directed Acyclic Graph (DAG) to manage dependencies between tasks:
+
+```mermaid
+graph TD
+    A[Scrape AliExpress Data] --> B[Train Attractiveness Classifier];
+    B --> C{Model Artifact (.pkl)};
+    B --> D{Performance Metrics};
+```
+
+### Pipeline Components
+
+Each step in the pipeline is a self-contained, containerized component. Here's an example of the scraper component definition:
+
+```python
+# kfp/components/scrape_aliexpress_component.py
+from kfp.dsl import component, Output, Dataset
+
+@component(
+    base_image="python:3.9",
+    packages_to_install=[
+        "pandas", "selenium", "webdriver-manager", "beautifulsoup4"
+    ],)
+def scrape_aliexpress_component(
+    max_pages: int,
+    output_data: Output[Dataset],):
+    """A Kubeflow component to scrape products from AliExpress."""
+    # ... (Selenium scraping logic)
+    # The final DataFrame is saved to the path provided by Kubeflow
+    df.to_csv(output_data.path, index=False)
+```
+
+### Pipeline Definition
+
+The components are assembled into a pipeline that defines the execution flow and data handoff.
+
+```python
+# kfp/pipeline.py
+from kfp import dsl
+from components import scrape_aliexpress_component, train_classifier_component
+
+@dsl.pipeline(
+    name="E-commerce AI Pipeline",
+    description="Scrapes product data and trains an attractiveness model.",
+    pipeline_root="gs://your-artifact-store/ecommerce-pipeline" # e.g., GCS or MinIO bucket)
+def ecommerce_ai_pipeline(max_pages: int = 5):
+    """Defines the workflow of the e-commerce AI pipeline."""
+
+    # Step 1: Scrape data
+    scrape_task = scrape_aliexpress_component(
+        max_pages=max_pages
+    )
+
+    # Step 2: Train model using the output from the scraping task
+    train_task = train_classifier_component(
+        input_dataset=scrape_task.outputs['output_data']
+    )
+```
+
+### Compiling and Running
+
+The pipeline is compiled to YAML and can be uploaded directly to the Kubeflow UI to create new runs.
+
+```bash
+# Compile the pipeline definition
+kfp dsl compile --python-function ecommerce_ai_pipeline pipeline.py --output ecommerce_pipeline.yaml
+
+# Upload the generated .yaml file in the Kubeflow Pipelines dashboard.
+```
+
 ## 🛠️ Troubleshooting
 **Common Issues:**
 1. **Missing API Key:**
@@ -207,4 +280,3 @@ minikube service ecommerce-service -n ecommerce
 ## 👥 Authors
 - Mohamed Amine BAHASSOU 
 - Hodaifa ECHFFANI
-
